@@ -1,5 +1,5 @@
 
-package com.90lucasgabriel.CybersourceDeviceFingerprint;
+package com.mauriciomartinscruz.CybersourceDeviceFingerprint;
 
 import android.app.Application;
 
