@@ -19,6 +19,7 @@ import com.threatmetrix.TrustDefender.TMXProfilingHandle.Result;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 
 public class RNCybersourceDeviceFingerprintModule extends ReactContextBaseJavaModule {
@@ -36,7 +37,7 @@ public class RNCybersourceDeviceFingerprintModule extends ReactContextBaseJavaMo
     }
 
     @ReactMethod
-    public void configure(final String orgId, final Promise promise) {
+    public void configure(final String orgId, final String serverURL, final Promise promise) {
         if (_defender != null) {
             promise.reject(CYBERSOURCE_SDK, "CyberSource SDK is already initialised");
             return;
@@ -47,7 +48,9 @@ public class RNCybersourceDeviceFingerprintModule extends ReactContextBaseJavaMo
         try {
             TMXConfig config = new TMXConfig()
                     .setOrgId(orgId)
+                    .setFPServer(serverURL)
                     .setContext(getReactApplicationContext());
+
             _defender.init(config);
         } catch (IllegalArgumentException exception) {
             promise.reject(CYBERSOURCE_SDK, "Invalid parameters");
@@ -56,23 +59,16 @@ public class RNCybersourceDeviceFingerprintModule extends ReactContextBaseJavaMo
     }
 
     @ReactMethod
-    public void getSessionID(final ReadableArray attributes, final Promise promise) {
+    public void getSessionID(final String merchantId, final Promise promise) {
         if (_defender == null) {
             promise.reject(CYBERSOURCE_SDK, "CyberSource SDK is not yet initialised");
             return;
         }
 
-        List<String> list = new ArrayList<>();
+        String sessionId = merchantId + new Date().getTime();
+        TMXProfilingOptions options = new TMXProfilingOptions().setCustomAttributes(null);
+        options.setSessionID(sessionId);
 
-        int leni = attributes.size();
-        for (int i = 0; i < leni; ++i) {
-            String value = attributes.getString(i);
-            if (value != null) {
-                list.add(value);
-            }
-        }
-
-        TMXProfilingOptions options = new TMXProfilingOptions().setCustomAttributes(list);
         TMXProfiling.getInstance().profile(options, new CompletionNotifier(promise));
     }
 

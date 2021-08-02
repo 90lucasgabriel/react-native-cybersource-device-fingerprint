@@ -23,45 +23,52 @@ static NSString *const kRejectCode = @"CyberSourceSDKModule";
 RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(
-                  configure:(NSString *)orgId
-                  // serverURL:(NSString *)serverURL
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject
-                  ) {
+    configure:(NSString *)orgId
+    serverURL:(NSString *)serverURL
+    resolver:(RCTPromiseResolveBlock)resolve
+    rejecter:(RCTPromiseRejectBlock)reject
+    ) {
     if (_defender) {
         reject(kRejectCode, @"CyberSource SDK is already initialised", nil);
         return;
     }
-    
+
     _defender = [TMXProfiling sharedInstance];
-    
+
     @try {
         [_defender configure:@{
                                TMXOrgID: orgId,
-                               // TMXFingerprintServer: serverURL,
+                               TMXFingerprintServer: serverURL,
                                }];
     } @catch (NSException *exception) {
         reject(kRejectCode, @"Invalid parameters", nil);
         return;
     }
-    
+
     resolve(@YES);
 }
 
 RCT_EXPORT_METHOD(
-                  getSessionID:(NSArray *)attributes
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject
-                  ) {
-    [_defender profileDeviceUsing:@{
-       TMXCustomAttributes: attributes,
-    } callbackBlock:^(NSDictionary * result) {
-        TMXStatusCode statusCode = [[result valueForKey:TMXProfileStatus] integerValue];
-        resolve(@{
-                   @"sessionId": [result valueForKey:TMXSessionID],
-                   @"status": @(statusCode),
-                  });
-    }];
+  getSessionID:(NSString *)merchantId
+  resolver:(RCTPromiseResolveBlock)resolve
+  rejecter:(RCTPromiseRejectBlock)reject
+  ) {
+  NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
+  NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp];
+
+  NSString *sessionId = [NSString stringWithFormat:@"%@%@", merchantId, timeStampObj];
+
+  TMXProfileHandle *profileHandle = [[TMXProfiling sharedInstance]
+    profileDeviceUsing:@{TMXSessionID : sessionId}
+
+    callbackBlock:^(NSDictionary * _Nullable result) {
+    TMXStatusCode statusCode = [[result valueForKey:TMXProfileStatus] integerValue];
+
+    resolve(@{
+      @"sessionId": [result valueForKey:TMXSessionID],
+      @"status": @(statusCode),
+    });
+  }];
 }
 
 @end
