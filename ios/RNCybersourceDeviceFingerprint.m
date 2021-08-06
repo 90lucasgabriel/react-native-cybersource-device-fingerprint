@@ -56,16 +56,19 @@ RCT_EXPORT_METHOD(
   NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
   NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp];
 
-  NSString *sessionId = [NSString stringWithFormat:@"%@%@", merchantId, timeStampObj];
+  NSString *timeStampText = [NSString stringWithFormat:@"%d", timeStampObj];
+  NSArray *attributes = @[timeStampText];
+
+  NSString *sessionId = [NSString stringWithFormat:@"%@%@", merchantId, timeStampText];
 
   TMXProfileHandle *profileHandle = [[TMXProfiling sharedInstance]
-    profileDeviceUsing:@{TMXSessionID : sessionId}
+    profileDeviceUsing:@{TMXSessionID : sessionId, TMXCustomAttributes: attributes}
 
     callbackBlock:^(NSDictionary * _Nullable result) {
     TMXStatusCode statusCode = [[result valueForKey:TMXProfileStatus] integerValue];
 
     resolve(@{
-      @"sessionId": [result valueForKey:TMXSessionID],
+      @"sessionId": [attributes objectAtIndex:0],
       @"status": @(statusCode),
     });
   }];

@@ -26,6 +26,7 @@ public class RNCybersourceDeviceFingerprintModule extends ReactContextBaseJavaMo
 
     private static final String CYBERSOURCE_SDK = "RNCybersourceDeviceFingerprint";
     private TMXProfiling _defender = null;
+    private String dateTime = "";
 
     public RNCybersourceDeviceFingerprintModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -65,7 +66,8 @@ public class RNCybersourceDeviceFingerprintModule extends ReactContextBaseJavaMo
             return;
         }
 
-        String sessionId = merchantId + new Date().getTime();
+        dateTime = "" + new Date().getTime();
+        String sessionId = merchantId + dateTime;
         TMXProfilingOptions options = new TMXProfilingOptions().setCustomAttributes(null);
         options.setSessionID(sessionId);
 
@@ -83,7 +85,7 @@ public class RNCybersourceDeviceFingerprintModule extends ReactContextBaseJavaMo
         @Override
         public void complete(Result result) {
             WritableMap map = new WritableNativeMap();
-            map.putString("sessionId", result.getSessionID());
+            map.putString("sessionId", dateTime);
             map.putInt("status", result.getStatus().ordinal());
             _promise.resolve(map);
         }
