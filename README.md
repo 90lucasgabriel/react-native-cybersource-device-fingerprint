@@ -36,24 +36,20 @@ NOTE: if you use Reactive Native 0.60+ you can autolinking, ignore this step 1.
 
 
 ## Usage
-```javascript
-import RNCybersourceDeviceFingerprint from 'react-native-cybersource-device-fingerprint'
+```ts
+import RNCybersourceDeviceFingerprint from 'react-native-cybersource-device-fingerprint';
 
-// INITIALIZE THE SDK
-RNCybersourceDeviceFingerprint.configure(ORG_ID).then( () => {
-	console.log('THE CYBERSOURCE INIT IS OK')
-})
-.catch(err => {
-	console.log('THE CYBERSOURCE INIT ERROR IS ', err)
-})
-// getSession accepts custom attributes for session, check the Cybersource SDK documentation
-// example: ['url', 'merchantId', 'customerIdUnique']
-RNCybersourceDeviceFingerprint.getSessionID([]).then( (obj) => {
-	console.log(`The session ID is ${obj.sessionId}`)
-})
-.catch(err => {
-	console.log('THE CYBERSOURCE ERROR IS ', err)
-})
+const getFingerprint = async (): Promise<string> => {
+  const orgId = 123456; // org_id do projeto
+  const serverURL = 'h.online-metrix.net'; // endpoint que recebe as informações do projeto
+  const merchantId = 'braspag_projeto'; // identificação única do projeto com a Braspag
 
+  RNCybersourceDeviceFingerprint?.configure(orgId, serverURL); // envio do org_id e do endpoint para validação
+  const { sessionId } = await RNCybersourceDeviceFingerprint?.getSessionID(merchantId); // envio do merchant_id que será concatenado e retorno do session_id
+
+  return sessionId;
+};
+
+export default getFingerprint;
 ```
   
